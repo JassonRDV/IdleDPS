@@ -1,13 +1,23 @@
-#ifndef ANDROIDGLINVESTIGATIONS_RENDERER_H
+#ifndef ANDROIDGLINVESTIGATIONS_RENDERER_H // include guard - For prevent multiple definitions
 #define ANDROIDGLINVESTIGATIONS_RENDERER_H
 
 #include <EGL/egl.h>
 #include <memory>
+#include <chrono>
 
 #include "Model.h"
 #include "Shader.h"
 
 struct android_app;
+
+// Estrutura para o estado do jogo
+struct GameState {
+    long long totalDamageDealt = 0;
+    long long currentMonsterHealth = 1000;
+    long long autoClickDamagePerSecond = 10;
+    int clicksPerSecond = 0;
+    std::chrono::high_resolution_clock::time_point lastFrameTime;
+};
 
 class Renderer {
 public:
@@ -23,6 +33,7 @@ public:
             height_(0),
             shaderNeedsNewProjectionMatrix_(true) {
         initRenderer();
+        gameState_.lastFrameTime = std::chrono::high_resolution_clock::now();
     }
 
     virtual ~Renderer();
@@ -58,6 +69,8 @@ private:
      */
     void createModels();
 
+    void updateGameState(float deltaTime);
+
     android_app *app_;
     EGLDisplay display_;
     EGLSurface surface_;
@@ -69,6 +82,8 @@ private:
 
     std::unique_ptr<Shader> shader_;
     std::vector<Model> models_;
+
+    GameState gameState_;
 };
 
 #endif //ANDROIDGLINVESTIGATIONS_RENDERER_H
